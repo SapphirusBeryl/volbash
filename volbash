@@ -97,7 +97,7 @@ adjust() {
     esac
 
     # Ascertain the volume level by parsing wpctl's output
-    vol=$(v="$(wpctl get-volume "$SOURCE")" echo "${v#* }")
+    vol=$(v="$(wpctl get-volume "$SOURCE")"; echo "${v#* }")
     vol=$([[ ${vol%.*} -gt 0 ]] && echo "${vol%.*}" || echo)${vol#*.}
 
     # Designate an arithmetic operator for the operation
