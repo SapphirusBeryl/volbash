@@ -1,0 +1,157 @@
+#!/usr/bin/env bash
+#
+# volbash - simple wpctl wrapper
+#
+# Copyright (C) 2025 Xavier Moffett <sapphirus@azorium.net>
+# SPDX-License-Identifier: MIT
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+set -eEo pipefail
+
+SOURCE="@DEFAULT_AUDIO_SINK@"
+
+main() {
+    local delta=5
+    local action=
+    local bypass=
+
+    while (($#)); do
+        case $1 in
+        --bypass)
+            bypass=1
+            ;;
+        --source | -s)
+            SOURCE="@DEFAULT_AUDIO_SOURCE@"
+            ;;
+        --delta | -d)
+            shift
+            delta=$1
+            ;;
+        --help | -h)
+            help
+            ;;
+        --version | -v)
+            version
+            ;;
+        -*)
+            invalid_option "$1"
+            ;;
+        *)
+            action="$1"
+            ;;
+        esac
+        shift
+    done
+
+    case $action in
+    up | down)
+        adjust "$action" "$delta" "$bypass"
+        ;;
+    mute | unmute)
+        toggle "$action"
+        ;;
+    toggle)
+        toggle
+        ;;
+    *)
+        invalid_option "$action"
+        ;;
+    esac
+}
+
+toggle() {
+    if [[ -z $1 ]]; then
+        wpctl set-mute "$SOURCE" toggle
+    else
+        wpctl set-mute "$SOURCE" "$([[ "$1" == "mute" ]] && echo 1 || echo 0)"
+    fi
+}
+
+adjust() {
+    local vol=
+    local op=
+    local delta=
+
+    # Check for valid input value
+    case $2 in '' | *[!0-9]*)
+        echo "error: Delta value must be a positive integer."
+        exit 2
+        ;;
+    esac
+
+    # Ascertain the volume level by parsing wpctl's output
+    vol=$(v="$(wpctl get-volume "$SOURCE")" echo "${v#* }")
+    vol=$([[ ${vol%.*} -gt 0 ]] && echo "${vol%.*}" || echo)${vol#*.}
+
+    # Designate an arithmetic operator for the operation
+    op=$([[ "$1" == "up" ]] && echo "+" || echo "-")
+    delta="${2}%$op"
+
+    # We check the if the volume increment exceeds 100 and override 
+    # the delta if the bypass option has not been specified.
+    if [[ -z $3 ]] && [[ $(("$vol" "$op" "$2")) -gt 100 ]]; then
+        delta="100%"
+    fi
+
+    wpctl set-volume "$SOURCE" "$delta"
+}
+
+invalid_option() {
+    if [[ -z $1 ]]; then
+        echo "error: Operation not specified"
+    else
+        echo "error: Invalid option '$1'"
+    fi
+
+    echo "Try '$ volbash --help' for further information."
+    exit 1
+}
+
+version() {
+    echo -e "volbash 1.0 - simple wpctl wrapper
+Copyright (C) 2025 Xavier Moffett\n
+Licensed under the MIT License\n"
+    exit
+}
+
+help() {
+    echo -e "Usage: volbash [OPERATION] | [OPTION]
+
+Operations:
+    up                          Increment volume
+    down                        Decrement volume
+    mute                        Mute volume
+    unmute                      Unmute volume
+    toggle                      Toggle mute
+ 
+Options:
+    --delta, -d VALUE           Set delta value
+    --source, -s                Apply operation to source
+    --bypass                    Allow increments past 100%
+    --version                   Print version information
+    --help                      Print this help and exit
+ 
+All operations apply to the default sink only.\n"
+    exit
+}
+
+main "$@"
+
+# vim:set ts=4 sw=4 et:1
