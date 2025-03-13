@@ -48,6 +48,6 @@ bindel = SHIFT,XF86AudioRaiseVolume, exec, volbash up --bypass
 bindel = SHIFT,XF86AudioLowerVolume, exec, volbash down --bypass
 ```
 
-# License
+## License
 
 [MIT license](./LICENSE)
