@@ -25,10 +25,13 @@
 
 set -eEo pipefail
 
+# Meta
 VERSION="1.0"
+NAME="${0##*/}"
 
-OUTPUT="@DEFAULT_AUDIO_SINK@"
+# Declare input and output sinks
 SOURCE="@DEFAULT_AUDIO_SOURCE@"
+OUTPUT="@DEFAULT_AUDIO_SINK@"
 
 main() {
     local action bypass
@@ -123,14 +126,14 @@ invalid_option() {
 }
 
 version() {
-    echo -e "volbash $VERSION - simple wpctl wrapper
+    echo -e "$NAME $VERSION - simple wpctl wrapper
 Copyright (C) 2025 Xavier Moffett\n
 Licensed under the MIT License\n"
     exit
 }
 
 help() {
-    echo -e "Usage: volbash [OPERATION] | [OPTION]
+    echo -e "Usage: $NAME [OPERATION] | [OPTION]
 
 Operations:
     up                          Increment volume
