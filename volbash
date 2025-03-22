@@ -90,12 +90,11 @@ toggle() {
 adjust() {
     local delta vol op 
 
-    # Check for valid input value
-    case $1 in '' | *[!0-9]*)
+    # Check for valid input value 
+    if [[ ! $1 -gt 0 ]]; then
         echo "error: Delta value must be a positive integer."
-        exit 2
-        ;;
-    esac
+        exit 2 
+    fi
 
     # Ascertain the volume level by parsing wpctl's output
     vol=$(v="$(wpctl get-volume "$sink")"; echo "${v#* }")
