@@ -127,7 +127,7 @@ invalid_option() {
 version() {
     echo -e "$NAME $VERSION - simple wpctl wrapper
 Copyright (C) 2025 Xavier Moffett\n
-Licensed under the MIT License\n"
+Distributed under the MIT License\n"
     exit
 }
 
