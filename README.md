@@ -1,3 +1,15 @@
+# Unmaintained
+
+⚠️ This project is unmaintained. ⚠️
+
+It is instead recommended you use `$ wpctl set-volume -l 1`.
+
+According to this commit [here](https://github.com/PipeWire/wireplumber/commit/b1b5bf2f5f001078daf058488ed7d02101cddcf9), this
+option was implemented like three years ago. Documentation didn't exist stating this option existed [until](https://github.com/PipeWire/wireplumber/commit/a5e58536dd315a0d08226fc5d4f45c871c9f8b8d#diff-3d90a93a82ce041d48bcb3c814902e6ca4010422afb26fbfebd474fed41475dd) 
+like six months after this project was embarked upon, and it was not obvious the option had existed prior (or I missed it).
+
+Either way, I'll keep this source code archived, just for the sake of showcasing some esoteric bashisms.
+
 # volbash
 
 WirePlumber Control CLI wrapper for use with window manager keybindings.
